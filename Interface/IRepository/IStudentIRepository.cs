@@ -11,5 +11,9 @@ namespace shoopdora_app.Interface.IRepository
     {
         Task<Student> CreateAsync(Student student);
         Task<List<StudentWithDetailsDTO>> GetAllAsync (int limit);
+        Task<StudentWithDetailsDTO> GetByIdAsync (int id);
+        Task<Student> UpdateStudentGradeAsync(int studentId, CreateStudentDto updateStudentDto);
+        Task<Student> SoftDeleteByIdAsync(int id);
+        Task<Student> DeleteById (int id);
     }
 }

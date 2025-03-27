@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Update;
 using shoopdora_app.Dtos;
 using shoopdora_app.Interface.IRepository;
 using shoopdora_app.Interface.IService;
@@ -67,6 +68,71 @@ namespace shoopdora_app.Controller
                 return BadRequest("No students were found.");
             }
             return Ok(students);
+        }
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById ([FromRoute] int id)
+        {
+            var student = await _studentRepo.GetByIdAsync(id);
+            if (student == null)
+            {
+                return BadRequest("Student does not exist.");
+            }
+
+            return Ok(student);
+        }
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateById ([FromRoute] int id, [FromBody] CreateStudentDto updateStudentDto)
+        {
+            var request = await _studentService.ValidateStudentAsync(updateStudentDto);
+            
+            if (!string.IsNullOrEmpty(request))
+            {
+                return BadRequest(new { message = request });
+            }
+
+            var updatedStudent = await _studentRepo.UpdateStudentGradeAsync(id, updateStudentDto);
+            if (updatedStudent == null)
+            {
+                return BadRequest("Student does not found is here.");
+            }
+
+            var returnStudent = new NewStudentDto
+            {
+                StudentId = updatedStudent.StudentId,
+                StudentName = updatedStudent.StudentName,
+                FatherName = updatedStudent.FatherName,
+                Email = updatedStudent.Email,
+                Age = updatedStudent.Age,
+                PhoneNumber = updatedStudent.PhoneNumber,
+                GradeId = updatedStudent.GradeId,
+                GradeName = updatedStudent.GradeId >= 1 && updatedStudent.GradeId <= 12
+                ? $"Grade {updatedStudent.GradeId}"
+                : null
+            };
+
+            return Ok(returnStudent);
+        }
+        [HttpPatch("{id}/soft-delete")]
+        public async Task<IActionResult> SoftDeleteById ([FromRoute] int id)
+        {
+            var deleteRecord = await _studentRepo.SoftDeleteByIdAsync(id);
+            if (deleteRecord == null)
+            {
+                return BadRequest("Student does not found.");
+            }
+            return Ok(deleteRecord);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteById ([FromRoute] int id)
+        {
+            var existStudent = await _studentRepo.DeleteById(id);
+            if (existStudent == null)
+            {
+                return BadRequest("Student does not found.");
+            }
+
+            return NoContent();
         }
     }
 }

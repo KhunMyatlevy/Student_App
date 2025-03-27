@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("shoopdora_app")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3acdb814bece2a1667c0fa102160f0217ede5491")]
 [assembly: System.Reflection.AssemblyProductAttribute("shoopdora_app")]
 [assembly: System.Reflection.AssemblyTitleAttribute("shoopdora_app")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

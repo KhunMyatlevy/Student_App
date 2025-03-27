@@ -42,6 +42,11 @@ namespace shoopdora_app.Service
                 return await Task.FromResult("Phone number must start with '09' and be 9 digits long.");
             }
 
+            if (createStudentDto.GradeId < 1 || createStudentDto.GradeId > 12)
+            {
+                return await Task.FromResult("GradeId must be between 1 and 12.");
+            }
+
             return await Task.FromResult(string.Empty);
         }
         private bool IsValidEmail(string email)

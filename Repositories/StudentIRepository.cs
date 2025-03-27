@@ -66,26 +66,40 @@ namespace shoopdora_app.Repositories
             return studentWithGradeAndSubjects;
         }
 
-       public async Task<List<StudentWithDetailsDTO>> GetAllAsync(int limit)
+        public async Task<Student> DeleteById(int id)
+        {
+            var existStudent = await _context.Students.FirstOrDefaultAsync(u => u.StudentId == id);
+            if (existStudent == null)
             {
-                IQueryable<Student> query = _context.Students
-                                                    .Include(s => s.Grade)
-                                                    .Include(s => s.StudentSubjects)
-                                                    .ThenInclude(ss => ss.Subject);
+                return null;
+            }
 
-                if (limit == 0)
-                {
-                    var allStudents = await query
-                        .Select(s => new StudentWithDetailsDTO
-                        {
-                            Id = s.StudentId,
-                            Name = s.StudentName,
-                            GradeName = s.Grade.GradeName,
-                            SubjectNames = s.StudentSubjects
+            _context.Students.Remove(existStudent);
+            await _context.SaveChangesAsync();
+            return existStudent;
+        }
+
+        public async Task<List<StudentWithDetailsDTO>> GetAllAsync(int limit)
+        {
+            IQueryable<Student> query = _context.Students
+                                                .Where(s => !s.IsDeleted)
+                                                .Include(s => s.Grade)
+                                                .Include(s => s.StudentSubjects)
+                                                .ThenInclude(ss => ss.Subject);
+
+            if (limit == 0)
+            {
+                var allStudents = await query
+                    .Select(s => new StudentWithDetailsDTO
+                    {
+                        Id = s.StudentId,
+                        Name = s.StudentName,
+                        GradeName = s.Grade.GradeName,
+                        SubjectNames = s.StudentSubjects
                                             .Select(ss => ss.Subject.SubjectName)
                                             .ToList()
-                        })
-                        .ToListAsync();
+                    })
+                    .ToListAsync();
 
                     return allStudents;
                 }
@@ -106,6 +120,103 @@ namespace shoopdora_app.Repositories
                 return students;
             }
 
+        public async Task<StudentWithDetailsDTO> GetByIdAsync(int id)
+        {
+            var student = await _context.Students
+                                        .Where(s => !s.IsDeleted)
+                                        .Include(s => s.Grade)
+                                        .Include(s => s.StudentSubjects)
+                                        .ThenInclude(ss => ss.Subject)
+                                        .FirstOrDefaultAsync(u => u.StudentId == id);
+
+            if (student == null)
+            {
+                return null;
+            }
+
+            var returnStudent = new StudentWithDetailsDTO
+            {
+                Id = student.StudentId,
+                Name = student.StudentName,
+                GradeName = student.Grade.GradeName,
+                SubjectNames = student.StudentSubjects
+                                    .Select(ss => ss.Subject.SubjectName)
+                                    .ToList()
+            };
+
+            return returnStudent;
+        }
+
+        public async Task<Student> SoftDeleteByIdAsync(int id)
+        {
+            var existingStudent = await _context.Students.FirstOrDefaultAsync(u => u.StudentId == id);
+            if (existingStudent == null)
+            {
+                return null;
+            } 
+            existingStudent.IsDeleted = true;
+            await _context.SaveChangesAsync();
+            return existingStudent;
+        }
+
+        public async Task<Student> UpdateStudentGradeAsync(int id, CreateStudentDto updateStudentDto)
+        {
+            var student = await _context.Students.FirstOrDefaultAsync(u => u.StudentId == id);
+            Console.WriteLine($"Student ID: {student.StudentId}");
+            Console.WriteLine($"Name: {student.StudentName}");
+            Console.WriteLine($"Father Name: {student.FatherName}");
+            Console.WriteLine($"Email: {student.Email}");
+            Console.WriteLine($"Age: {student.Age}");
+            Console.WriteLine($"Phone Number: {student.PhoneNumber}");
+            Console.WriteLine($"Grade ID: {student.GradeId}");
+            Console.WriteLine($"Is Deleted: {student.IsDeleted}");
+            Console.WriteLine($"Created At: {student.CreatedAt}");
+            Console.WriteLine($"Updated At: {student.UpdatedAt?.ToString() ?? "N/A"}");
+
+            if (student == null)
+                return null;
+
+            if (student.IsDeleted == true)
+            {
+                return null;
+            }
+
+            if (student.GradeId != updateStudentDto.GradeId)
+            {
+
+            var currentSubjects = await _context.StudentSubjects
+                .Where(ss => ss.StudentId == id)
+                .ToListAsync();
+
+            _context.StudentSubjects.RemoveRange(currentSubjects);
+
+            var newSubjects = await _context.GradeSubjects
+                .Where(gs => gs.GradeId == updateStudentDto.GradeId)
+                .Select(gs => gs.SubjectId)
+                .ToListAsync();
+
+            foreach (var subjectId in newSubjects)
+            {
+                _context.StudentSubjects.Add(new StudentSubject
+                {
+                    StudentId = id,
+                    SubjectId = subjectId
+                });
+            }
+
+            student.GradeId = updateStudentDto.GradeId;
+            }
+
+            student.Age = updateStudentDto.Age;
+            student.StudentName = updateStudentDto.StudentName;
+            student.FatherName = updateStudentDto.FatherName;
+            student.PhoneNumber = updateStudentDto.PhoneNumber;
+            student.Email = updateStudentDto.Email;
+            student.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return student;
+        }
 
     }
 }
