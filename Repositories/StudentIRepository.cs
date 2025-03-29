@@ -94,6 +94,10 @@ namespace shoopdora_app.Repositories
                     {
                         Id = s.StudentId,
                         Name = s.StudentName,
+                        FatherName = s.FatherName,
+                        Email = s.Email,
+                        Age = s.Age,
+                        PhoneNumber = s.PhoneNumber,
                         GradeName = s.Grade.GradeName,
                         SubjectNames = s.StudentSubjects
                                             .Select(ss => ss.Subject.SubjectName)
@@ -110,6 +114,10 @@ namespace shoopdora_app.Repositories
                     {
                         Id = s.StudentId,
                         Name = s.StudentName,
+                        FatherName = s.FatherName,
+                        Email = s.Email,
+                        Age = s.Age,
+                        PhoneNumber = s.PhoneNumber,
                         GradeName = s.Grade.GradeName,  
                         SubjectNames = s.StudentSubjects
                                         .Select(ss => ss.Subject.SubjectName) 
@@ -135,9 +143,14 @@ namespace shoopdora_app.Repositories
             }
 
             var returnStudent = new StudentWithDetailsDTO
+
             {
                 Id = student.StudentId,
                 Name = student.StudentName,
+                FatherName = student.FatherName,
+                Email = student.Email,
+                Age = student.Age,
+                PhoneNumber = student.PhoneNumber,
                 GradeName = student.Grade.GradeName,
                 SubjectNames = student.StudentSubjects
                                     .Select(ss => ss.Subject.SubjectName)
@@ -162,16 +175,6 @@ namespace shoopdora_app.Repositories
         public async Task<Student> UpdateStudentGradeAsync(int id, CreateStudentDto updateStudentDto)
         {
             var student = await _context.Students.FirstOrDefaultAsync(u => u.StudentId == id);
-            Console.WriteLine($"Student ID: {student.StudentId}");
-            Console.WriteLine($"Name: {student.StudentName}");
-            Console.WriteLine($"Father Name: {student.FatherName}");
-            Console.WriteLine($"Email: {student.Email}");
-            Console.WriteLine($"Age: {student.Age}");
-            Console.WriteLine($"Phone Number: {student.PhoneNumber}");
-            Console.WriteLine($"Grade ID: {student.GradeId}");
-            Console.WriteLine($"Is Deleted: {student.IsDeleted}");
-            Console.WriteLine($"Created At: {student.CreatedAt}");
-            Console.WriteLine($"Updated At: {student.UpdatedAt?.ToString() ?? "N/A"}");
 
             if (student == null)
                 return null;
